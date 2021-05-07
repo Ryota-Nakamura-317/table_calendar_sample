@@ -16,6 +16,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   int getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
+  
 
   @override
   void initState() {
@@ -60,7 +61,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       hashCode: getHashCode,
     )..addAll(_eventsList);
 
-    List getEventForDay(DateTime day) {
+    List _getEventForDay(DateTime day) {
       return _events[day] ?? [];
     }
     
@@ -72,14 +73,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: Column(
         children: [
           TableCalendar(
-            // 以下必ず設定が必要
+            //locale: 'ja_JP',
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
             focusedDay: _focusedDay,
-            // eventLoaderでマーカーが付くようになる。
-            eventLoader: getEventForDay,
+            eventLoader: _getEventForDay,
             calendarFormat: _calendarFormat,
-            // フォーマット変更のボタン押下時の処理
             onFormatChanged: (format) {
               if (_calendarFormat != format) {
                 setState(() {
@@ -88,9 +87,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               }
             },
             selectedDayPredicate: (day) {
-              // どの日が現在選択されているかを判断するには、`selectedDayPredicate`を使用します。
-              // これがtrueを返した場合、`day`が選択されたとみなされます。
-              //  isSameDay`の使用は、比較されたDateTimeオブジェクトの時間部分を無視するために推奨されます。
               return isSameDay(_selectedDay, day);
             },
             onDaySelected: (selectedDay, focusedDay) {
@@ -98,9 +94,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 setState(() {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
-                  
                 });
-                getEventForDay(selectedDay);
+                _getEventForDay(selectedDay);
               }
             },
             onPageChanged: (focusedDay) {
@@ -109,7 +104,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           ListView(
             shrinkWrap: true,
-            children: getEventForDay(_selectedDay!)
+            children: _getEventForDay(_selectedDay!)
                 .map((event) => ListTile(
                       title: Text(event.toString()),
                     ))
